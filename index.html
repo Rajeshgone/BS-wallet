@@ -1,249 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-<meta name="base:app_id" content="69d8a85f34c69936dc95d6d0" />  
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="base:app_id" content="69d8a85f34c69936dc95d6d0">  
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-<title>Base Pro Wallet</title>
+<title>Base Wallet Pro</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
-<style>
-body {
-  margin:0;
-  font-family:'Inter',sans-serif;
-  background:#05070c;
-  color:white;
-  display:flex;
-}
-
-/* SIDEBAR */
-.sidebar {
-  width:240px;
-  background:linear-gradient(180deg,#0d1b3a,#020617);
-  padding:20px;
-  height:100vh;
-}
-.sidebar h2 { color:#3b82f6; }
-.menu { margin-top:20px; }
-.menu div {
-  padding:12px;
-  border-radius:10px;
-  margin-bottom:8px;
-  cursor:pointer;
-}
-.menu div:hover { background:#1f2937; }
-
-/* MAIN */
-.main {
-  flex:1;
-  padding:20px;
-}
-
-/* HEADER */
-.header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-button {
-  padding:10px 16px;
-  border:none;
-  border-radius:10px;
-  background:#3b82f6;
-  color:white;
-  cursor:pointer;
-}
-
-/* CARD */
-.card {
-  background:#0f172a;
-  padding:20px;
-  border-radius:16px;
-  margin-top:20px;
-}
-
-/* GRID */
-.grid {
-  display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:20px;
-}
-
-/* INPUT */
-input {
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:10px;
-  border:none;
-  background:#1e293b;
-  color:white;
-}
-
-/* TRANSACTIONS */
-.tx {
-  margin-top:10px;
-  padding:10px;
-  border-bottom:1px solid #1f2937;
-}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
   <h2>Base</h2>
-  <div class="menu">
-    <div>Dashboard</div>
-    <div>Send</div>
-    <div>Swap</div>
-    <div>Bridge</div>
-    <div>Transactions</div>
-    <div>NFTs</div>
-  </div>
-
-  <div style="margin-top:40px;">
-    <small>Wallet</small>
-    <div id="wallet">Not connected</div>
-  </div>
+  <div onclick="show('swap')">Swap</div>
+  <div onclick="show('activity')">Activity</div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
-  <div class="header">
-    <h2>Welcome back 👋</h2>
-    <button onclick="connect()">Connect Wallet</button>
-  </div>
+<h1>Base Wallet</h1>
+<button onclick="connect()">Connect Wallet</button>
 
-  <!-- GRID -->
-  <div class="grid">
-
-    <!-- LEFT -->
-    <div>
-
-      <!-- BALANCE -->
-      <div class="card">
-        <h3>Total Balance</h3>
-        <h1 id="total">$0.00</h1>
-        <p id="eth">0 ETH</p>
-
-        <button onclick="sendSection()">Send</button>
-      </div>
-
-      <!-- TRANSACTIONS -->
-      <div class="card">
-        <h3>Recent Transactions</h3>
-        <div id="txs"></div>
-      </div>
-
-    </div>
-
-    <!-- RIGHT -->
-    <div>
-
-      <div class="card">
-        <h3>Assets</h3>
-        <p>ETH: <span id="ethBal">--</span></p>
-        <p>USDC: <span id="usdcBal">--</span></p>
-      </div>
-
-      <!-- SEND -->
-      <div class="card" id="sendBox" style="display:none;">
-        <h3>Send USDC</h3>
-        <input id="to" placeholder="Address" />
-        <input id="amount" placeholder="Amount" />
-        <button onclick="sendUSDC()">Send</button>
-      </div>
-
-    </div>
-
-  </div>
-
+<div class="card">
+  <p id="wallet">Not connected</p>
+  <p>ETH: <span id="eth">--</span></p>
+  <p>USDC: <span id="usdc">--</span></p>
 </div>
 
-<script>
-let user = null;
-const USDC = "0xd9aaec86b65d86f6a7b5c1c42ffa531710b6cae9";
+<!-- SWAP -->
+<div class="card section" id="swap">
 
-// CONNECT
-async function connect(){
-  const acc = await ethereum.request({method:"eth_requestAccounts"});
-  user = acc[0];
-  document.getElementById("wallet").innerText = user;
-  load();
-}
+  <div class="swap-box" onclick="openTokenModal('from')">
+    <img id="fromIcon" width="20">
+    <span id="fromTokenLabel">ETH</span>
+    <input id="fromAmount" oninput="getQuote()" placeholder="0.0">
+  </div>
 
-// LOAD BALANCES
-async function load(){
-  const eth = await ethereum.request({
-    method:"eth_getBalance",
-    params:[user,"latest"]
-  });
+  <button onclick="switchTokens()">⇅</button>
 
-  const ethVal = parseInt(eth,16)/1e18;
+  <div class="swap-box" onclick="openTokenModal('to')">
+    <img id="toIcon" width="20">
+    <span id="toTokenLabel">USDC</span>
+    <input id="toAmount" disabled placeholder="0.0">
+  </div>
 
-  document.getElementById("ethBal").innerText = ethVal.toFixed(4);
-  document.getElementById("eth").innerText = ethVal.toFixed(4)+" ETH";
+  <p id="rate"></p>
+  <p id="minReceived"></p>
+  <p id="gas"></p>
 
-  // USDC
-  const data = "0x70a08231"+user.slice(2).padStart(64,"0");
+  <input id="slippage" value="0.5">
 
-  const usdc = await ethereum.request({
-    method:"eth_call",
-    params:[{to:USDC,data:data},"latest"]
-  });
+  <button onclick="executeSwap()">Swap</button>
+</div>
 
-  const usdcVal = parseInt(usdc,16)/1e6;
+<!-- ACTIVITY -->
+<div class="card section" id="activity">
+  <h3>Activity</h3>
+  <div id="txs"></div>
+</div>
 
-  document.getElementById("usdcBal").innerText = usdcVal.toFixed(2);
+<!-- TOKEN MODAL -->
+<div id="tokenModal" class="modal">
+  <div class="modal-content">
+    <input placeholder="Search..." oninput="filterTokens(this.value)">
+    <div id="tokenList"></div>
+  </div>
+</div>
 
-  const total = (ethVal*3000 + usdcVal).toFixed(2);
-  document.getElementById("total").innerText = "$"+total;
-}
-
-// SHOW SEND
-function sendSection(){
-  document.getElementById("sendBox").style.display="block";
-}
-
-// SEND USDC
-async function sendUSDC(){
-  const to = document.getElementById("to").value;
-  const amt = document.getElementById("amount").value;
-
-  const value = (Number(amt)*1e6).toString(16).padStart(64,"0");
-
-  const data =
-    "0xa9059cbb"+
-    to.slice(2).padStart(64,"0")+
-    value;
-
-  const tx = await ethereum.request({
-    method:"eth_sendTransaction",
-    params:[{
-      from:user,
-      to:USDC,
-      data:data
-    }]
-  });
-
-  addTx("Sent "+amt+" USDC");
-}
-
-// LOCAL TX LIST
-function addTx(text){
-  const div = document.createElement("div");
-  div.className="tx";
-  div.innerText=text;
-  document.getElementById("txs").prepend(div);
-}
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
