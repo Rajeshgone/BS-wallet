@@ -122,7 +122,7 @@ function updateMin(receive){
     "Min received: "+(receive*(1-slip)).toFixed(6);
 }
 
-/* GAS */
+/* GASS */
 async function estimateGas(tx){
   const gas = await ethereum.request({
     method:"eth_estimateGas",
