@@ -40,7 +40,7 @@ async function loadBalances(){
   document.getElementById("eth").innerText = (parseInt(eth,16)/1e18).toFixed(4);
 }
 
-/* TOKEN MODAL */
+/* TOKEN MODALL */
 function openTokenModal(type){
   selecting = type;
   document.getElementById("tokenModal").style.display="block";
