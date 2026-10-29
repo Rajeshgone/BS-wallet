@@ -76,7 +76,7 @@ function selectToken(t){
   document.getElementById("tokenModal").style.display="none";
 }
 
-/* SWITCH */
+/* SWITCHH */
 function switchTokens(){
   [fromToken,toToken] = [toToken,fromToken];
   document.getElementById("fromTokenLabel").innerText=fromToken.symbol;
