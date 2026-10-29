@@ -23,7 +23,7 @@ let quoteData = null;
 document.getElementById("fromIcon").src = fromToken.icon;
 document.getElementById("toIcon").src = toToken.icon;
 
-/* CONNECT WALLET */
+/* CONNECT WALLETt */
 async function connect(){
   const acc = await ethereum.request({method:"eth_requestAccounts"});
   user = acc[0];
