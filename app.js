@@ -31,7 +31,7 @@ async function connect(){
   loadBalances();
 }
 
-/* BALANCE */
+/* BALANCEE */
 async function loadBalances(){
   const eth = await ethereum.request({
     method:"eth_getBalance",
